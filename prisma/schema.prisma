@@ -1,0 +1,131 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model RepairRequest {
+  id          String        @id @default(uuid())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  title       String
+  description String
+  status      RequestStatus @default(PENDING)
+  photos      Json? // URLs des photos
+  videos      Json? // URLs des vidéos
+  scheduledAt DateTime? // RDV prévu
+  address     String?
+
+  // Relations
+  clientId String
+  client   User   @relation("ClientRequests", fields: [clientId], references: [id])
+
+  artisanId String?
+  artisan   User?   @relation("ArtisanRequests", fields: [artisanId], references: [id])
+
+  quotes Quote[]
+  chat   Message[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  phone     String?
+  role      UserRole @default(CLIENT)
+  location  String?
+  latitude  Float?
+  longitude Float?
+
+  // Relations
+  repairRequestsAsClient  RepairRequest[] @relation("ClientRequests")
+  repairRequestsAsArtisan RepairRequest[] @relation("ArtisanRequests")
+
+  reviewsGiven    Review[]  @relation("ReviewAuthor")
+  reviewsReceived Review[]  @relation("ReviewTarget")
+  messages        Message[] @relation("UserMessages")
+  Quote           Quote[]
+}
+
+model Quote {
+  id          String      @id @default(uuid())
+  createdAt   DateTime    @default(now())
+  amount      Float
+  status      QuoteStatus @default(PENDING)
+  description String?
+
+  // Relations
+  requestId String
+  request   RepairRequest @relation(fields: [requestId], references: [id])
+
+  artisanId String
+  artisan   User   @relation(fields: [artisanId], references: [id])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  rating    Int // Note 1 à 5
+  comment   String?
+
+  // Relations
+  authorId String
+  author   User   @relation("ReviewAuthor", fields: [authorId], references: [id])
+
+  targetId String
+  target   User   @relation("ReviewTarget", fields: [targetId], references: [id])
+}
+
+model Message {
+  id        String      @id @default(uuid())
+  createdAt DateTime    @default(now())
+  content   String
+  type      MessageType @default(TEXT)
+
+  // Relations
+  requestId String
+  request   RepairRequest @relation(fields: [requestId], references: [id])
+
+  senderId String
+  sender   User   @relation("UserMessages", fields: [senderId], references: [id])
+}
+
+enum UserRole {
+  CLIENT
+  ARTISAN
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum QuoteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  SYSTEM
+}
