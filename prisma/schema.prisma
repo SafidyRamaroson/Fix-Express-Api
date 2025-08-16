@@ -28,10 +28,10 @@ model RepairRequest {
 
   // Relations
   clientId String
-  client   User   @relation("ClientRequests", fields: [clientId], references: [id])
+  client   User   @relation("ClientRequests", fields: [clientId], references: [id], onDelete: Cascade)
 
   artisanId String?
-  artisan   User?   @relation("ArtisanRequests", fields: [artisanId], references: [id])
+  artisan   User?   @relation("ArtisanRequests", fields: [artisanId], references: [id], onDelete: Cascade)
 
   quotes Quote[]
   chat   Message[]
@@ -70,10 +70,10 @@ model Quote {
 
   // Relations
   requestId String
-  request   RepairRequest @relation(fields: [requestId], references: [id])
+  request   RepairRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
 
   artisanId String
-  artisan   User   @relation(fields: [artisanId], references: [id])
+  artisan   User   @relation(fields: [artisanId], references: [id], onDelete: Cascade)
 }
 
 model Review {
@@ -84,10 +84,10 @@ model Review {
 
   // Relations
   authorId String
-  author   User   @relation("ReviewAuthor", fields: [authorId], references: [id])
+  author   User   @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
 
   targetId String
-  target   User   @relation("ReviewTarget", fields: [targetId], references: [id])
+  target   User   @relation("ReviewTarget", fields: [targetId], references: [id], onDelete: Cascade)
 }
 
 model Message {
@@ -98,10 +98,10 @@ model Message {
 
   // Relations
   requestId String
-  request   RepairRequest @relation(fields: [requestId], references: [id])
+  request   RepairRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
 
   senderId String
-  sender   User   @relation("UserMessages", fields: [senderId], references: [id])
+  sender   User   @relation("UserMessages", fields: [senderId], references: [id], onDelete: Cascade)
 }
 
 enum UserRole {
